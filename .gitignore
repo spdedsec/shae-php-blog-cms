@@ -1,0 +1,7 @@
+data/
+data/posts.json
+data/posts.json.tmp
+*.zip
+vendor/
+.DS_Store
+.env
