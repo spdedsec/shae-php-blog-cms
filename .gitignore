@@ -5,3 +5,4 @@ data/posts.json.tmp
 vendor/
 .DS_Store
 .env
+.vercel
