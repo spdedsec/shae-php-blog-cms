@@ -51,22 +51,26 @@ if ($post === null && $id !== false && $id !== null) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?= $post ? e($post['title']) : 'Post not found' ?> &mdash; SHAE Blog</title>
+<meta name="color-scheme" content="light dark">
+<title><?= $post ? e($post['title']) : 'Post Not Found' ?> &mdash; Blog CMS</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <main class="container">
   <header class="view-header">
-    <h1><?= $post ? e($post['title']) : 'Post not found' ?></h1>
-    <p class="meta">
-      <a href="index.php" class="meta-link">&larr; Back to posts</a>
-      <?php if ($post): ?>
-        <span class="meta-divider">&middot;</span>
-        <span>Created <?= e($post['created_at']) ?></span>
-        <span class="meta-divider">&middot;</span>
-        <span>Updated <?= e($post['updated_at']) ?></span>
-      <?php endif; ?>
+    <p class="meta" style="margin-bottom: 12px;">
+      <a href="index.php" class="meta-link">&larr; Back to all posts</a>
     </p>
+    <h1><?= $post ? e($post['title']) : 'Post Not Found' ?></h1>
+    <?php if ($post): ?>
+      <p class="meta">
+        <span>Published <?= e(date('M j, Y &middot; g:i A', strtotime($post['created_at']))) ?></span>
+        <?php if ($post['updated_at'] !== $post['created_at']): ?>
+          <span class="meta-divider">&middot;</span>
+          <span>Updated <?= e(date('M j, Y', strtotime($post['updated_at']))) ?></span>
+        <?php endif; ?>
+      </p>
+    <?php endif; ?>
   </header>
 
   <?php if ($message !== ''): ?>
@@ -75,11 +79,14 @@ if ($post === null && $id !== false && $id !== null) {
 
   <?php if ($post === null): ?>
     <section class="card">
-      <p>No post with id <?= e((string)$id) ?> exists.</p>
+      <p>No post with ID <?= e((string)$id) ?> was found.</p>
+      <div style="margin-top: 16px;">
+        <a href="index.php" class="btn btn-primary">Return Home</a>
+      </div>
     </section>
   <?php elseif ($showEdit): ?>
     <section class="card">
-      <h2 class="section-title">Edit post</h2>
+      <h2 class="section-title">Edit Post</h2>
       <form action="post.php?id=<?= (int)$post['id'] ?>" method="post" novalidate class="edit-form">
         <input type="hidden" name="action" value="update">
         <label class="field-label" for="title">Title</label>
@@ -89,32 +96,32 @@ if ($post === null && $id !== false && $id !== null) {
         <textarea name="content" id="content" class="field" rows="10"
                   required><?= e($post['content']) ?></textarea>
         <div class="form-actions">
-          <button type="submit" class="btn btn--oxide">Update post</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
           <a href="post.php?id=<?= (int)$post['id'] ?>" class="btn btn--outline">Cancel</a>
         </div>
       </form>
     </section>
   <?php else: ?>
-    <section class="card post-detail">
+    <article class="card post-detail">
       <div class="post-content"><?= nl2br(e($post['content'])) ?></div>
-    </section>
+    </article>
     <section class="card post-actions">
-      <h2 class="section-title" style="display:none">Actions</h2>
       <div class="form-actions">
+        <a href="post.php?id=<?= (int)$post['id'] ?>&amp;edit=1" class="btn btn-primary">Edit Post</a>
         <form action="post.php?id=<?= (int)$post['id'] ?>" method="post" style="display:inline">
           <input type="hidden" name="id" value="<?= (int)$post['id'] ?>">
           <input type="hidden" name="action" value="delete">
-          <button type="submit" class="btn btn--oxide"
-                  onclick="return confirm('Delete this post?')">Delete post</button>
+          <button type="submit" class="btn btn--danger"
+                  onclick="return confirm('Are you sure you want to delete this post?')">Delete</button>
         </form>
-        <a href="post.php?id=<?= (int)$post['id'] ?>&amp;edit=1" class="btn btn--outline">Edit post</a>
-        <a href="index.php" class="btn btn--outline">Back to posts</a>
+        <a href="index.php" class="btn btn--outline">Back</a>
       </div>
     </section>
   <?php endif; ?>
 
   <footer class="view-footer">
-    <p class="meta">SHAE Blog CMS &middot; v0.1.0</p>
+    <p class="meta">Apple HIG Design &middot; PHP Container Runtime</p>
+    <p class="meta"><a href="https://github.com/spdedsec/shae-php-blog-cms" target="_blank" rel="noopener" class="meta-link">GitHub</a></p>
   </footer>
 </main>
 </body>

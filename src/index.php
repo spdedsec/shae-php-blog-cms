@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
         $messageType = 'error';
     } else {
         create_post($title, $content);
-        $message = 'Post created.';
+        $message = 'Post created successfully.';
         $messageType = 'success';
     }
 }
@@ -29,14 +29,16 @@ $posts = read_posts();
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SHAE Blog &mdash; Posts</title>
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Blog CMS - Apple HIG Publishing Platform">
+<title>Blog CMS &mdash; Posts</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <main class="container">
   <header class="view-header">
-    <h1>SHAE Blog</h1>
-    <p class="meta">A field-manual CMS &mdash; posts stored in JSON.</p>
+    <h1>Blog CMS</h1>
+    <p class="meta">Apple Human Interface Guidelines &middot; Cupertino Publishing Platform</p>
   </header>
 
   <?php if ($message !== ''): ?>
@@ -44,21 +46,21 @@ $posts = read_posts();
   <?php endif; ?>
 
   <section class="card">
-    <h2 class="section-title">All posts</h2>
+    <h2 class="section-title">All Posts</h2>
     <?php if (empty($posts)): ?>
-      <p class="empty">No posts yet. Create your first post below.</p>
+      <p class="empty">No posts yet. Publish your first post below.</p>
     <?php else: ?>
       <ul class="post-list">
         <?php foreach ($posts as $post): ?>
           <li class="post-item">
             <a href="post.php?id=<?= (int)$post['id'] ?>" class="post-link">
               <span class="post-title"><?= e($post['title']) ?></span>
-              <span class="post-date"><?= e($post['created_at']) ?></span>
+              <span class="post-date"><?= e(date('M j, Y &middot; g:i A', strtotime($post['created_at']))) ?></span>
             </a>
             <form action="post.php" method="post" class="delete-form" style="display:inline">
               <input type="hidden" name="id" value="<?= (int)$post['id'] ?>">
               <input type="hidden" name="action" value="delete">
-              <button type="submit" class="btn btn--oxide btn--small"
+              <button type="submit" class="btn btn--danger btn--small"
                       onclick="return confirm('Delete this post?')">Delete</button>
             </form>
           </li>
@@ -68,21 +70,22 @@ $posts = read_posts();
   </section>
 
   <section class="card">
-    <h2 class="section-title">New post</h2>
+    <h2 class="section-title">New Post</h2>
     <form action="index.php" method="post" novalidate class="create-form">
       <input type="hidden" name="action" value="create">
       <label class="field-label" for="title">Title</label>
       <input type="text" name="title" id="title" class="field"
-             required maxlength="200" value="<?= e($_POST['title'] ?? '') ?>">
+             placeholder="Enter article title..." required maxlength="200" value="<?= e($_POST['title'] ?? '') ?>">
       <label class="field-label" for="content">Content</label>
       <textarea name="content" id="content" class="field" rows="8"
-                required><?= e($_POST['content'] ?? '') ?></textarea>
-      <button type="submit" class="btn btn--oxide">Create post</button>
+                placeholder="Compose article in plain text or markdown..." required><?= e($_POST['content'] ?? '') ?></textarea>
+      <button type="submit" class="btn btn-primary">Publish Post</button>
     </form>
   </section>
 
   <footer class="view-footer">
-    <p class="meta">SHAE Blog CMS &middot; v0.1.0</p>
+    <p class="meta">Apple HIG Design &middot; PHP Container Runtime</p>
+    <p class="meta"><a href="https://github.com/spdedsec/shae-php-blog-cms" target="_blank" rel="noopener" class="meta-link">GitHub</a></p>
   </footer>
 </main>
 </body>

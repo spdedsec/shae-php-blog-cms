@@ -2,50 +2,62 @@
 declare(strict_types=1);
 
 /**
- * SHAE Blog CMS — JSON storage layer.
- *
- * Posts are stored in data/posts.json relative to the project root.
- * Each post record:
- *   ['id' => int, 'title' => string, 'content' => string,
- *    'created_at' => string (ISO-8601), 'updated_at' => string (ISO-8601)]
+ * Blog CMS — Apple HIG Storage Layer (JSON-based)
  */
 
-const STORAGE_FILE = __DIR__ . '/../data/posts.json';
-
-/**
- * Return the absolute path to the JSON storage file.
- */
-function storage_path(): string
+function get_storage_path(): string
 {
-    return STORAGE_FILE;
+    // Production container path or local fallback
+    if (is_dir('/var/www/data') && is_writable('/var/www/data')) {
+        return '/var/www/data/posts.json';
+    }
+    $localDir = __DIR__ . '/../data';
+    if (!is_dir($localDir)) {
+        @mkdir($localDir, 0775, true);
+    }
+    if (is_writable($localDir)) {
+        return $localDir . '/posts.json';
+    }
+    // Fallback to system temp directory
+    return sys_get_temp_dir() . '/shae_posts.json';
 }
 
-/**
- * Ensure the storage directory and JSON file exist.
- */
 function ensure_storage(): void
 {
-    $dir = dirname(STORAGE_FILE);
+    $file = get_storage_path();
+    $dir = dirname($file);
     if (!is_dir($dir)) {
         @mkdir($dir, 0775, true);
     }
-    if (!file_exists(STORAGE_FILE)) {
-        file_put_contents(STORAGE_FILE, json_encode(
-            [],
-            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-        ));
+    if (!file_exists($file)) {
+        $initial = [
+            [
+                'id' => 1,
+                'title' => 'Designing for Apple Platforms: The HIG Philosophy',
+                'content' => "Apple Human Interface Guidelines (HIG) provide essential guidance for creating intuitive, engaging, and consistent experiences.\n\nKey Principles:\n• Clarity: Text is legible at every size, icons are precise and lucid, and adornments are subtle.\n• Deference: Fluid motion and a crisp interface help people understand and interact with content without competing with it.\n• Depth: Distinct visual layers and realistic motion impart hierarchy, imparting vitality and facilitating understanding.",
+                'created_at' => (new DateTimeImmutable('-2 hours'))->format(DateTimeInterface::ATOM),
+                'updated_at' => (new DateTimeImmutable('-2 hours'))->format(DateTimeInterface::ATOM),
+            ],
+            [
+                'id' => 2,
+                'title' => 'Dynamic Light and Dark Mode in Modern CSS',
+                'content' => "Supporting dark mode natively with color-scheme: light dark and CSS custom properties provides a seamless experience for users.\n\nBy leveraging Apple System Colors like System Blue (#007AFF), System Green (#34C759), and adaptive backgrounds (UIColor.systemBackground), the web app feels right at home on macOS and iOS.",
+                'created_at' => (new DateTimeImmutable('-1 hour'))->format(DateTimeInterface::ATOM),
+                'updated_at' => (new DateTimeImmutable('-1 hour'))->format(DateTimeInterface::ATOM),
+            ]
+        ];
+        file_put_contents($file, json_encode($initial, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
 }
 
-/**
- * Read all posts from the JSON file, sorted newest first.
- *
- * @return list<array{id:int, title:string, content:string, created_at:string, updated_at:string}>
- */
 function read_posts(): array
 {
     ensure_storage();
-    $raw = file_get_contents(STORAGE_FILE);
+    $file = get_storage_path();
+    $raw = @file_get_contents($file);
+    if ($raw === false) {
+        return [];
+    }
     $data = json_decode($raw, true);
     if (!is_array($data)) {
         return [];
@@ -56,11 +68,6 @@ function read_posts(): array
     return array_values($data);
 }
 
-/**
- * Find a post by id.
- *
- * @return array{id:int, title:string, content:string, created_at:string, updated_at:string}|null
- */
 function find_post(int $id): ?array
 {
     foreach (read_posts() as $post) {
@@ -71,9 +78,6 @@ function find_post(int $id): ?array
     return null;
 }
 
-/**
- * Create a new post and return the stored record.
- */
 function create_post(string $title, string $content): array
 {
     $posts = read_posts();
@@ -94,9 +98,6 @@ function create_post(string $title, string $content): array
     return $post;
 }
 
-/**
- * Update an existing post. Returns true on success, false if not found.
- */
 function update_post(int $id, string $title, string $content): bool
 {
     $posts = read_posts();
@@ -119,9 +120,6 @@ function update_post(int $id, string $title, string $content): bool
     return true;
 }
 
-/**
- * Delete a post by id. Returns true on success, false if not found.
- */
 function delete_post(int $id): bool
 {
     $posts = read_posts();
@@ -139,24 +137,19 @@ function delete_post(int $id): bool
     return true;
 }
 
-/**
- * Atomically write the posts array to the JSON storage file.
- */
 function write_posts(array $posts): void
 {
     ensure_storage();
+    $file = get_storage_path();
     $json = json_encode(
         $posts,
         JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
     );
-    $tmp = STORAGE_FILE . '.tmp';
+    $tmp = $file . '.tmp';
     file_put_contents($tmp, $json);
-    rename($tmp, STORAGE_FILE);
+    rename($tmp, $file);
 }
 
-/**
- * Escape a string for safe HTML output.
- */
 function e(string $s): string
 {
     return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');

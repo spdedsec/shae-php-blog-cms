@@ -1,82 +1,35 @@
-# shae-php-blog-cms
+# Blog CMS (PHP & Apache)
 
-SHAE Blog CMS — a tiny, dependency-free blog/content management system in PHP.
-Posts are stored in a single JSON file (`data/posts.json`); no database is required.
-
-Built to the **SHAE Field Manual Design System**: warm paper `#F2EEE5`, ink
-`#191712`, one oxide-red `#B3341B` signal per view, `0px` radius, `1px` borders,
-border-defined cards, `44px` touch targets, oxide focus rings, and `140–240ms`
-motion. See `DESIGN.md`.
+A lightweight blogging platform and content management system written in PHP 8.3 and packaged with Apache, styled strictly following the Apple Human Interface Guidelines (HIG).
 
 ## Features
 
-- Create, read, update, delete blog posts (full CRUD)
-- Posts stored in JSON (no database)
-- List view with titles and dates
-- Detail view with full content
-- Simple HTML forms styled Apple-like: paper background, ink text, oxide buttons
-- `0px` radius, `1px` borders, `44px` touch targets
+- **Apple HIG Design System** — San Francisco typography, Cupertino cards, system accent buttons, light/dark mode support
+- **Container Architecture** — Production Docker container with PHP 8.3, Apache `mod_rewrite`, non-root execution permissions, and dynamic `$PORT` binding
+- **CRUD Publishing** — Create, read, edit, and delete articles with JSON document storage
+- **Clean URLs** — Apache `.htaccess` rewrite rules for human-friendly routing
+- **Responsive & Accessible** — Full keyboard accessibility, touch targets ≥ 44pt, and visible focus rings
+- **Health Checks** — Native container healthcheck probe
 
-## Requirements
-
-- PHP 8.1+ (CLI or a web server such as `php -S`, nginx, or Apache)
-- Write access to `data/` (where `data/posts.json` is created automatically)
-
-> **Note:** PHP is not installed in this environment, so the CMS cannot be
-> run or tested locally here. See `scripts/install.sh` for install notes.
-
-## Install
+## Local Development (Docker)
 
 ```bash
-# Clone
-git clone https://github.com/spdedsec/shae-php-blog-cms.git
-cd shae-php-blog-cms
-
-# Review install notes
-./scripts/install.sh
+docker build -t php-blog-cms .
+docker run -p 8080:80 php-blog-cms
 ```
 
-## Run (built-in PHP web server)
+Visit `http://localhost:8080`.
 
-```bash
-cd src
-php -S localhost:8000
-# Open http://localhost:8000/index.php
-```
+## Design System
 
-With nginx/Apache, point the document root at `src/` and route `.php` requests
-to the PHP interpreter.
-
-## Usage
-
-- `index.php` — list all posts (newest first) and create a new post.
-- `post.php?id=<id>` — view a post; edit or delete it from the detail view.
-- Post data lives in `data/posts.json` (gitignored, created on first write).
-
-## Project structure
-
-```
-src/
-  index.php     # list view + create form
-  post.php      # detail view + edit + delete + update
-  storage.php   # JSON storage layer
-  styles.css    # SHAE design-system stylesheet
-data/           # posts.json (created at runtime, gitignored)
-scripts/install.sh
-Makefile
-README.md
-DESIGN.md
-.github/workflows/release.yml
-docs/DE.md
-docs/ES.md
-LICENSE
-```
-
-## Release
-
-Releases are created from git tags (`v*`) via
-`.github/workflows/release.yml` and packaged as a zip of `src/`.
+Engineered strictly following the [Apple Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/):
+- **Typography:** San Francisco (`-apple-system`, `BlinkMacSystemFont`, `SF Pro Text`, `SF Pro Display`)
+- **System Colors:** Apple System Blue (`#007AFF` / `#0A84FF`), Apple System Green (`#34C759` / `#30D158`), Apple System Red (`#FF3B30` / `#FF453A`)
+- **Light/Dark Mode:** Full support via `color-scheme: light dark` and `@media (prefers-color-scheme: dark)`
+- **8pt Grid:** Precision layout rhythm
+- **Corner Radii:** 8pt, 12pt, 16pt, pill buttons
+- **Elevation:** Apple 5-tier elevation shadows
 
 ## License
 
-MIT. See `LICENSE`.
+MIT © 2026 spdedsec
